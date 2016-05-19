@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo Linux $(uname -r | sed "s/-ARCH//")

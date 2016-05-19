@@ -1,0 +1,24 @@
+#!/bin/bash
+if [[ -f /tmp/temp$1_input ]]; then
+	status=0
+	temp=$(cat /tmp/temp$1_input | sed s/000//)
+
+	if [[ $temp -le  30 ]]; then
+		color="#008CF7é"
+	elif [[ $temp -le 45 ]]; then
+		color="#00FF00"
+	elif [[ $temp -le 65 ]]; then
+		color="#FFAE00"
+	elif [[ $temp -le 90 ]]; then
+		color="#FF0000"
+	else
+		status=33
+		color="#FFF"
+	fi
+	echo $temp°
+	echo $temp°
+	echo $color
+	exit $status
+fi
+
+exit 1
