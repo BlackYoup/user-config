@@ -190,3 +190,6 @@ for_window [class="Gsimplecal"] floating enable
 for_window [class="Gsimplecal"] move absolute position 1189px 605px
 
 bindsym $mod+m move workspace to output left
+
+new_window none
+hide_edge_borders both
