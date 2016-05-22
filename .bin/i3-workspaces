@@ -1,0 +1,6 @@
+i3-msg 'rename workspace 1 to 1:Console'
+i3-msg 'rename workspace 2 to 2:Dev'
+i3-msg 'rename workspace 3 to 3:Utils'
+i3-msg 'rename workspace 5 to 5:Web'
+i3-msg 'rename workspace 6 to 6:Incognito'
+i3-msg 'rename workspace 9 to 9:Signal'

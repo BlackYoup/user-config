@@ -1,0 +1,87 @@
+#!/bin/bash
+# imie-shares: a sccript to mount windows shared directory on unix 
+environment.
+#### Constants ####
+CREDENTIAL_FILE=/etc/smbcredentials
+MNT_ROOT=/mnt/imie
+SERVER="//10.1.0.3"
+###################
+LOCAL_IP=`ip route | awk '/default/ {print $3}'`
+MNT_OPTIONS="credentials=$CREDENTIAL_FILE,workgroup=formation,uid=`id 
+-u`,gid=`id -g`"
+function disclaimer () {
+    touch $HOME/.config/imie-shares
+}
+function register_credentials () {
+    echo "creating credentials file."
+    echo -n "  Please enter your imie username: "
+    read NAME
+    echo "username=$NAME" | sudo tee -a $CREDENTIAL_FILE > /dev/null
+    echo -n "  Please enter your imie user password (it won't be 
+displayed):"
+    read -s PASSWORD
+    echo "password=$PASSWORD" | sudo tee -a $CREDENTIAL_FILE > /dev/null
+    sudo chmod 400 $CREDENTIAL_FILE
+    echo ""
+}
+function mountp () {
+    echo -ne "mounting $2..."
+    sudo mount -t cifs $SERVER/$1 $MNT_ROOT/$2 -o $MNT_OPTIONS
+    if [ $? == 0 ]; then
+        echo -e \\r"mounting $2...\t[\e[00;32mok\e[00m]"
+    else
+        echo -e \\r"mounting $2...\t[\e[00;31mfailed\e[00m]"
+    fi
+}
+function umountp () {
+    echo -ne "lazy umount for $1..."
+    sudo umount -l $MNT_ROOT/$1 2> /dev/null
+    if [ $? == 0 ]; then
+        echo -e \\r"lazy umount for $1...\t[\e[00;32mok\e[00m]"
+    else
+        echo -e \\r"lazy umount for $1...\t[\e[00;31mfailed\e[00m]"
+    fi
+}
+function create_mountpoint () {
+    echo "creating mountpoint if they don't exist."
+    sudo mkdir -p $MNT_ROOT/{sources,cours,donnees}
+}
+function help () {
+    echo "usage: $0 [ SESSION | umount | -h | --help ]"
+}
+function main () {
+    if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+        help
+        return
+    fi
+    if [[ `whereis cifs` == "cifs:" ]]; then
+        echo "please install 'cifs-utils' from your repositories."
+        return
+    fi
+    #Obtaining sudo rights
+    sudo echo "" > /dev/null
+    if [[ $1 == "umount" ]]; then
+        umountp "cours"
+        umountp "donnees"
+        umountp "sources"
+        return
+    fi
+    if [ ! -f "$CREDENTIAL_FILE" ]; then
+        register_credentials
+    fi
+    create_mountpoint
+    if [[ "$LOCAL_IP" == *1*.1*.* ]]; then
+        mountp "sources" "sources"
+        if [ "" != "$1" ]; then
+            mountp "donnees_$1$" "donnees"
+            mountp "cours_$1$" "cours"
+        else
+            echo "session not defined, not mounting 'cours' nor 
+'donnees'."
+        fi
+    else
+        echo "either you're not connected or you're not on the right 
+network, aborting."
+    fi
+}
+main "cdpn07"

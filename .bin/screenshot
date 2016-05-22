@@ -1,0 +1,2 @@
+scrot -s $HOME/Images/`date +%Y-%m-%d_%H:%M:%S`.png &
+sleep 10 
